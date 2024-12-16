@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Robot index{% endblock %}
+
+{% block body %}
+    <h1>Robot index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Image</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for robot in robots %}
+            <tr>
+                <td>{{ robot.id }}</td>
+                <td>{{ robot.name }}</td>
+                <td>{{ robot.description }}</td>
+                <td>{{ robot.price }}</td>
+                <td>{{ robot.image }}</td>
+                <td>
+                    <a href="{{ path('app_robot_show', {'id': robot.id}) }}">show</a>
+                    <a href="{{ path('app_robot_edit', {'id': robot.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_robot_new') }}">Create new</a>
+{% endblock %}
