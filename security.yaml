@@ -1,0 +1,37 @@
+security:
+    # Définit les encodeurs de mot de passe (si vous utilisez Symfony 5.3+)
+    password_hashers:
+        App\Entity\User:
+            algorithm: auto
+
+    # Fournisseurs d'utilisateur
+    providers:
+        database:
+            entity:
+                class: App\Entity\User
+                property: email
+
+    # Firewalls
+    firewalls:
+        main:
+            pattern: ^/
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                default_target_path: /
+                username_parameter: _username
+                password_parameter: _password
+            logout:
+                path: app_logout
+                target: app_login
+            anonymous: true
+    # Rôles
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_USER]
+
+    # Contrôle d'accès
+    access_control:
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/user, roles: ROLE_USER }
+    
+    

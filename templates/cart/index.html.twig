@@ -1,33 +1,30 @@
-{% extends 'base.html.twig' %}
+{# templates/cart/index.html.twig #}
 
-{% block title %}Cart index{% endblock %}
+{% extends 'base.html.twig' %}
+{% block stylesheets %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    {{ parent() }} {# Ajoute les styles globaux du parent #}
+{% endblock %}
+
+{% block title %}Mon Panier{% endblock %}
 
 {% block body %}
-    <h1>Cart index</h1>
+    <h1>Mon Panier</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for cart in carts %}
-            <tr>
-                <td>{{ cart.id }}</td>
-                <td>
-                    <a href="{{ path('app_cart_show', {'id': cart.id}) }}">show</a>
-                    <a href="{{ path('app_cart_edit', {'id': cart.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="2">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    {% if cartItems is not empty %}
+        <ul>
+            {% for item in cartItems %}
+                <li>
+                    {{ item.robot.name }} ({{ item.quantity }}) - {{ item.robot.price }}€
+                    <a href="{{ path('cart_remove', { 'id': item.id }) }}">Supprimer</a>
+                </li>
+            {% endfor %}
+        </ul>
 
-    <a href="{{ path('app_cart_new') }}">Create new</a>
+        <p>Total : {{ total }}€</p>
+
+        <a href="{{ path('cart_clear') }}">Vider le panier</a>
+    {% else %}
+        <p>Votre panier est vide.</p>
+    {% endif %}
 {% endblock %}

@@ -13,30 +13,18 @@ class CartItem
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
-    private ?int $quantity = null;
-
     #[ORM\ManyToOne(inversedBy: 'cartItems')]
     private ?Cart $cart = null;
 
-    #[ORM\ManyToOne(inversedBy: 'cartItems')]
+    #[ORM\ManyToOne]
     private ?Robot $robot = null;
+
+    #[ORM\Column]
+    private ?int $quantity = null;
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getQuantity(): ?int
-    {
-        return $this->quantity;
-    }
-
-    public function setQuantity(int $quantity): static
-    {
-        $this->quantity = $quantity;
-
-        return $this;
     }
 
     public function getCart(): ?Cart
@@ -59,6 +47,18 @@ class CartItem
     public function setRobot(?Robot $robot): static
     {
         $this->robot = $robot;
+
+        return $this;
+    }
+
+    public function getQuantity(): ?int
+    {
+        return $this->quantity;
+    }
+
+    public function setQuantity(int $quantity): static
+    {
+        $this->quantity = $quantity;
 
         return $this;
     }

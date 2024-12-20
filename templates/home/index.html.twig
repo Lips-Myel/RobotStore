@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+{% block stylesheets %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    {{ parent() }} {# Ajoute les styles globaux du parent #}
+{% endblock %}
+
+{% block javascripts %}
+    {# Ajoutez ici vos scripts JavaScript si nécessaire #}
+{% endblock %}
+
+{% block body %}
+    <h1>Bienvenue sur RobotStore</h1>
+    <p>Découvrez nos robots.</p>
+
+    {% for robot in robots %}
+        <div class="robot">
+            <h2>{{ robot.name }}</h2>
+            <p>{{ robot.description }}</p>
+            <p><strong>Prix : </strong>{{ robot.price }} €</p>
+            <img src="{{ robot.image }}" alt="{{ robot.name }}" />
+           <a href="{{ path('cart', { 'id': robot.id }) }}">
+            <i class="fa fa-shopping-cart"></i> Ajouter au panier
+            </a>
+        </div>
+    {% else %}
+        <p>Aucun robot trouvé.</p>
+    {% endfor %}
+
+    {# Pagination #}
+    <div class="pagination">
+        {% if currentPage > 1 %}
+            <a href="{{ path('home', { 'page': currentPage - 1 }) }}">Page précédente</a>
+        {% endif %}
+    {# Liens pour chaque page #}
+        {% for i in 1..totalPages %}
+            <a href="{{ path('home', { 'page': i }) }}" 
+            class="{{ i == currentPage ? 'active' : '' }}">
+                {{ i }}
+            </a>
+    {% endfor %}
+        
+
+        {% if currentPage < totalPages %}
+            <a href="{{ path('home', { 'page': currentPage + 1 }) }}">Page suivante</a>
+        {% endif %}
+    </div>
+    <p>Page {{ currentPage }} sur {{ totalPages }}</p>
+{% endblock %}

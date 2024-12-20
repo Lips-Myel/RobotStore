@@ -1,81 +1,117 @@
 <?php
+// src/Controller/CartController.php
 
 namespace App\Controller;
 
 use App\Entity\Cart;
-use App\Form\CartType;
-use App\Repository\CartRepository;
+use App\Entity\CartItem;
+use App\Entity\Robot;
+use App\Repository\CartItemRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/cart')]
-final class CartController extends AbstractController
+class CartController extends AbstractController
 {
-    #[Route(name: 'app_cart_index', methods: ['GET'])]
-    public function index(CartRepository $cartRepository): Response
+    #[Route("/cart", name: "cart")]
+    public function index(Request $request, CartItemRepository $cartItemRepository): Response
     {
-        return $this->render('cart/index.html.twig', [
-            'carts' => $cartRepository->findAll(),
-        ]);
-    }
+        // Récupérer le panier depuis la session
+        $user = $this->getUser(); // Exemple : Assurez-vous que l'utilisateur est connecté
+        $cart = $this->getDoctrine()->getRepository(Cart::class)->findOneBy(['user' => $user]);
 
-    #[Route('/new', name: 'app_cart_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $cart = new Cart();
-        $form = $this->createForm(CartType::class, $cart);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
+        if (!$cart) {
+            $cart = new Cart();
+            $cart->setUser($user);  // Assurez-vous d'avoir un utilisateur associé
+            $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($cart);
             $entityManager->flush();
-
-            return $this->redirectToRoute('app_cart_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('cart/new.html.twig', [
-            'cart' => $cart,
-            'form' => $form,
+        // Récupérer les éléments du panier (CartItem)
+        $cartItems = $cart->getCartItems();
+        
+        // Calculer le total du panier
+        $total = 0;
+        foreach ($cartItems as $cartItem) {
+            $total += $cartItem->getRobot()->getPrice() * $cartItem->getQuantity();
+        }
+
+        // Passer le panier et le total à la vue
+        return $this->render('cart/index.html.twig', [
+            'cartItems' => $cartItems,
+            'total' => $total,
         ]);
     }
 
-    #[Route('/{id}', name: 'app_cart_show', methods: ['GET'])]
-    public function show(Cart $cart): Response
+    #[Route("/cart/add/{id}", name: "cart_add")]
+    public function add(Request $request, $id, CartItemRepository $cartItemRepository, EntityManagerInterface $em): Response
     {
-        return $this->render('cart/show.html.twig', [
-            'cart' => $cart,
-        ]);
-    }
+        // Récupérer le produit
+        $product = $this->getDoctrine()->getRepository(Robot::class)->find($id);
 
-    #[Route('/{id}/edit', name: 'app_cart_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Cart $cart, EntityManagerInterface $entityManager): Response
-    {
-        $form = $this->createForm(CartType::class, $cart);
-        $form->handleRequest($request);
+        if ($product) {
+            $user = $this->getUser(); // Assurez-vous que l'utilisateur est connecté
+            $cart = $this->getDoctrine()->getRepository(Cart::class)->findOneBy(['user' => $user]);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
+            if (!$cart) {
+                $cart = new Cart();
+                $cart->setUser($user);
+                $em->persist($cart);
+                $em->flush();
+            }
 
-            return $this->redirectToRoute('app_cart_index', [], Response::HTTP_SEE_OTHER);
+            // Vérifier si l'élément est déjà dans le panier
+            $existingCartItem = $cartItemRepository->findOneBy(['cart' => $cart, 'robot' => $product]);
+
+            if ($existingCartItem) {
+                // Si l'élément existe déjà, on augmente la quantité
+                $existingCartItem->setQuantity($existingCartItem->getQuantity() + 1);
+                $em->flush();
+            } else {
+                // Sinon, on crée un nouvel item dans le panier
+                $cartItem = new CartItem();
+                $cartItem->setCart($cart);
+                $cartItem->setRobot($product);
+                $cartItem->setQuantity(1);  // Par défaut une seule unité
+                $em->persist($cartItem);
+                $em->flush();
+            }
         }
 
-        return $this->render('cart/edit.html.twig', [
-            'cart' => $cart,
-            'form' => $form,
-        ]);
+        return $this->redirectToRoute('cart');
     }
 
-    #[Route('/{id}', name: 'app_cart_delete', methods: ['POST'])]
-    public function delete(Request $request, Cart $cart, EntityManagerInterface $entityManager): Response
+    #[Route("/cart/remove/{id}", name: "cart_remove")]
+    public function remove(Request $request, $id, CartItemRepository $cartItemRepository, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$cart->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($cart);
-            $entityManager->flush();
+        // Récupérer l'élément du panier
+        $cartItem = $cartItemRepository->find($id);
+
+        if ($cartItem) {
+            $em->remove($cartItem);
+            $em->flush();
         }
 
-        return $this->redirectToRoute('app_cart_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('cart');
+    }
+
+    #[Route("/cart/clear", name: "cart_clear")]
+    public function clear(Request $request, CartItemRepository $cartItemRepository, EntityManagerInterface $em): Response
+    {
+        // Effacer tous les éléments du panier pour l'utilisateur
+        $user = $this->getUser(); // Exemple : Assurez-vous que l'utilisateur est connecté
+        $cart = $this->getDoctrine()->getRepository(Cart::class)->findOneBy(['user' => $user]);
+
+        if ($cart) {
+            foreach ($cart->getCartItems() as $cartItem) {
+                $em->remove($cartItem);
+            }
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('cart');
     }
 }

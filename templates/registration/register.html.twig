@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block body %}
+    <h1>Inscription</h1>
+
+    {# Afficher les erreurs du formulaire si elles existent #}
+    {{ form_errors(registrationForm) }}
+
+    {# Démarrer le formulaire #}
+    {{ form_start(registrationForm) }}
+        
+        {# Champ email #}
+        {{ form_row(registrationForm.email, {
+            'label': 'Adresse email'
+        }) }}
+        
+        {# Champ mot de passe #}
+        {{ form_row(registrationForm.plainPassword, {
+            'label': 'Mot de passe'
+        }) }}
+        
+        {# Case à cocher pour accepter les termes #}
+        {{ form_row(registrationForm.agreeTerms, {
+            'label': 'J\'accepte les termes et conditions'
+        }) }}
+
+        {# Bouton de soumission #}
+        <button type="submit" class="btn">S\'inscrire</button>
+        
+    {{ form_end(registrationForm) }}
+
+{% endblock %}
