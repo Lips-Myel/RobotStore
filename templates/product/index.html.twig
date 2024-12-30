@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ robot.name }} - RobotStore{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/product.css') }}">
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+<div class="product-container">
+    <div class="product-header">
+        <h1>{{ robot.name }}</h1>
+        <p class="product-category">{{ robot.category ? robot.category.name : 'Aucune catégorie' }}</p>
+    </div>
+
+    <div class="product-details">
+        <div class="product-image">
+            <img src="{{ asset('upload/image/' ~ robot.image) }}" alt="{{ robot.name }}">
+        </div>
+
+        <div class="product-info">
+            <p class="product-description">{{ robot.description }}</p>
+            <p class="product-price"><strong>Prix :</strong> {{ robot.price }} €</p>
+
+            <form action="{{ path('cart_add', { 'cartId': cart.id, 'robotId': robot.id }) }}" method="post">
+                <button type="submit" class="btn-add-to-cart">
+                    <i class="fa fa-shopping-cart"></i> Ajouter au panier
+                </button>
+            </form>
+            <a href="{{ path('home') }}" class="continue-shopping">Continuer vos achats</a>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

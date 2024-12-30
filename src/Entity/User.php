@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -30,9 +32,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $role = 'ROLE_USER'; // Définir un rôle par défaut
 
+    #[ORM\OneToMany(targetEntity: Cart::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private Collection $carts;
+
     public function __construct()
     {
-        // Initialisation, vous pouvez personnaliser si nécessaire
+        $this->carts = new ArrayCollection();
     }
 
     public function getRoles(): array
@@ -67,7 +72,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    // Getter et Setter pour le mot de passe
     public function getPassword(): ?string
     {
         return $this->password;
@@ -79,7 +83,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    // Pour gérer le mot de passe en clair
     public function getPlainPassword(): ?string
     {
         return $this->plainPassword;
@@ -91,11 +94,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    // Méthode pour encoder le mot de passe
     public function setEncodedPassword(UserPasswordHasherInterface $passwordHasher): void
     {
         if ($this->plainPassword) {
-            // Encoder le mot de passe
             $this->password = $passwordHasher->hashPassword($this, $this->plainPassword);
             $this->plainPassword = null; // Effacer le mot de passe en clair après l'encodage
         }
@@ -109,6 +110,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setRole(string $role): static
     {
         $this->role = $role;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Cart>
+     */
+    public function getCarts(): Collection
+    {
+        return $this->carts;
+    }
+
+    public function addCart(Cart $cart): static
+    {
+        if (!$this->carts->contains($cart)) {
+            $this->carts->add($cart);
+            $cart->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCart(Cart $cart): static
+    {
+        if ($this->carts->removeElement($cart)) {
+            if ($cart->getUser() === $this) {
+                $cart->setUser(null);
+            }
+        }
+
         return $this;
     }
 }

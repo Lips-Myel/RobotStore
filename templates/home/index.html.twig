@@ -1,7 +1,12 @@
 {% extends 'base.html.twig' %}
+
 {% block stylesheets %}
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     {{ parent() }} {# Ajoute les styles globaux du parent #}
+    
+    {{ parent() }} {# Conserve les styles globaux du parent #}
+    <link rel="stylesheet" href="{{ asset('styles/home.css') }}"
+
 {% endblock %}
 
 {% block javascripts %}
@@ -12,36 +17,72 @@
     <h1>Bienvenue sur RobotStore</h1>
     <p>Découvrez nos robots.</p>
 
+    <!-- Formulaire pour le tri et les filtres -->
+    <form method="get" action="{{ path('home') }}" id="filterForm">
+        <div class="filters">
+            <label for="category">Catégorie :</label>
+            <select name="category" id="category" onchange="document.getElementById('filterForm').submit()">
+                <option value="" {{ selectedCategory is empty ? 'selected' : '' }}>Toutes les catégories</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {{ category.id == selectedCategory ? 'selected' : '' }}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <label for="sort">Trier par :</label>
+            <select name="sort" id="sort" onchange="document.getElementById('filterForm').submit()">
+                <option value="price_asc" {{ sort == 'price_asc' ? 'selected' : '' }}>Prix croissant</option>
+                <option value="price_desc" {{ sort == 'price_desc' ? 'selected' : '' }}>Prix décroissant</option>
+                <option value="name_asc" {{ sort == 'name_asc' ? 'selected' : '' }}>Ordre alphabétique</option>
+                <option value="name_desc" {{ sort == 'name_desc' ? 'selected' : '' }}>Ordre alphabétique inverse</option>
+            </select>
+        </div>
+    </form>
+
+
+    <div class="robot-list">
+    <!-- Liste des robots -->
     {% for robot in robots %}
         <div class="robot">
-            <h2>{{ robot.name }}</h2>
+            <img src="{{ asset('upload/image/' ~ robot.image) }}" alt="{{ robot.name }}" width="250"></p>
+            <h2><a class="robot-title" href="{{ path('product_show', { 'id': robot.id }) }}">{{ robot.name }}</a></h2>
             <p>{{ robot.description }}</p>
-            <p><strong>Prix : </strong>{{ robot.price }} €</p>
-            <img src="{{ robot.image }}" alt="{{ robot.name }}" />
-           <a href="{{ path('cart', { 'id': robot.id }) }}">
-            <i class="fa fa-shopping-cart"></i> Ajouter au panier
+            <p><strong>Prix :</strong> {{ robot.price }} €</p>
+
+            {# Affichage de la catégorie #}
+            <p><strong>Catégorie :</strong> 
+                {% if robot.category %}
+                    <span class="category-label category-{{ robot.category.id }}">{{ robot.category.name }}</span>
+                {% else %}
+                    <span class="category-label">Aucune catégorie</span>
+                {% endif %}
+            </p>
+
+            <a href="{{ path('cart_add', { 'cartId': cart.id, 'robotId': robot.id }) }}">
+                <i class="fa fa-shopping-cart"></i> Ajouter au panier
             </a>
         </div>
     {% else %}
         <p>Aucun robot trouvé.</p>
+    
     {% endfor %}
-
-    {# Pagination #}
+    </div>
+    <!-- Pagination -->
     <div class="pagination">
         {% if currentPage > 1 %}
-            <a href="{{ path('home', { 'page': currentPage - 1 }) }}">Page précédente</a>
+            <a href="{{ path('home', { 'page': currentPage - 1, 'sort': sort, 'category': selectedCategory }) }}">Page précédente</a>
         {% endif %}
-    {# Liens pour chaque page #}
+
         {% for i in 1..totalPages %}
-            <a href="{{ path('home', { 'page': i }) }}" 
-            class="{{ i == currentPage ? 'active' : '' }}">
+            <a href="{{ path('home', { 'page': i, 'sort': sort, 'category': selectedCategory }) }}" 
+               class="{{ i == currentPage ? 'active' : '' }}">
                 {{ i }}
             </a>
-    {% endfor %}
-        
+        {% endfor %}
 
         {% if currentPage < totalPages %}
-            <a href="{{ path('home', { 'page': currentPage + 1 }) }}">Page suivante</a>
+            <a href="{{ path('home', { 'page': currentPage + 1, 'sort': sort, 'category': selectedCategory }) }}">Page suivante</a>
         {% endif %}
     </div>
     <p>Page {{ currentPage }} sur {{ totalPages }}</p>

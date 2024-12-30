@@ -1,0 +1,87 @@
+
+        body {
+            font-family: 'Orbitron', sans-serif; /* Police futuriste */
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(120deg, #1a1a2e, #16213e); /* Couleurs cyberpunk */
+            color: #fff;
+        }
+
+        .site-header {
+            background: linear-gradient(90deg, #ff007f, #6a0dad, #1a1a2e); /* Dégradé cyberpunk */
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.5);
+            padding: 15px 0;
+            position: fixed;
+            width: 100vw;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .site-header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .site-title {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        .site-title a {
+            color: #fff;
+            text-decoration: none;
+            text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f, 0 0 30px #ff007f; /* Effet lumineux */
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .site-title a:hover {
+            color: #00d4ff;
+            text-shadow: 0 0 20px #00d4ff, 0 0 40px #00d4ff; /* Changement d'effet lumineux */
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        .header-nav .icon-link {
+            color: #fff;
+            font-size: 1.5em;
+            text-decoration: none;
+            position: relative;
+            transition: transform 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .header-nav .icon-link:hover {
+            color: #ff007f;
+            transform: scale(1.1);
+            text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f;
+        }
+
+        .header-nav .icon-link i {
+            display: block;
+        }
+
+        .header-nav .icon-link:after {
+            content: attr(title);
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8em;
+            color: #ff007f;
+            text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .header-nav .icon-link:hover:after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+    
+

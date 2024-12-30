@@ -1,3 +1,6 @@
+<link rel="stylesheet" href="{{ asset('styles/header.css') }}" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
 <header class="site-header">
     <div class="container">
         <h1 class="site-title">
@@ -7,10 +10,9 @@
             <a href="{{ path('app_login') }}" class="icon-link" title="Mon profil">
                 <i class="fa fa-user"></i>
             </a>
-            <a href="{{ path('app_register') }}" class="icon-link" title="Mon profil">
+            <a href="{{ path('app_register') }}" class="icon-link" title="S'inscrire">
                 <i class="fa-solid fa-user-plus"></i>
             </a>
-            
             <a href="{{ path('cart') }}" class="icon-link" title="Mon panier">
                 <i class="fa fa-shopping-cart"></i>
             </a>
